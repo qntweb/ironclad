@@ -1,0 +1,35 @@
+kind: secret
+name: registry-username
+get:
+  path: wa-hcloud-drone-registry-user
+  name: USERNAME
+---
+kind: secret
+name: registry-password
+get:
+  path: wa-hcloud-drone-registry-user
+  name: PASSWORD
+---
+kind: pipeline
+type: docker
+name: Publish docker image
+
+trigger:
+  event:
+    - push
+  branch:
+    - customization
+
+steps:
+  - name: Publish Docker Image
+    image: plugins/docker
+    settings:
+      dockerfile: Dockerfile
+      registry: registry.wa.qntdev.com
+      repo: registry.wa.qntdev.com/webagency/ironclad
+      username:
+        from_secret: registry-username
+      password:
+        from_secret: registry-password
+      tags:
+        - ${DRONE_COMMIT_SHA:0:8}
